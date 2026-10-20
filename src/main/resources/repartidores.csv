@@ -1,0 +1,4 @@
+id;nombre;telefono;disponible
+1;Matías Rojas;+56911111111;true
+2;Camila Fuentes;+56922222222;false
+3;Diego Soto;+56933333333;true
