@@ -1,6 +1,6 @@
 # GestionPedidosPizzeria
 
-Aplicación de consola en Kotlin/JVM para registrar un pedido de pizzería por ejecución: registra al cliente, permite elegir una pizza del catálogo y su cantidad, verifica y descuenta el stock, calcula el total (con 10% de descuento cuando se piden más de 3 pizzas), asigna el primer repartidor disponible y muestra un resumen del pedido.
+Aplicación de consola en Kotlin/JVM para registrar un pedido de pizzería por ejecución: registra al cliente, permite elegir una pizza del catálogo y su cantidad, verifica y descuenta el stock, calcula el total (con 10% de descuento cuando se piden más de 3 pizzas), asigna el primer repartidor disponible, simula por consola la notificación al cliente y muestra un resumen del pedido.
 
 El catálogo de pizzas y la lista de repartidores se cargan desde archivos CSV en `src/main/resources`.
 

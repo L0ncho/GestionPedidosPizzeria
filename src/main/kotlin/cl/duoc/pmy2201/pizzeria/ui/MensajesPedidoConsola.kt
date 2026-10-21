@@ -1,5 +1,6 @@
 package cl.duoc.pmy2201.pizzeria.ui
 
+import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.model.Pizza
 import cl.duoc.pmy2201.pizzeria.service.CalculadoraPedido
 import cl.duoc.pmy2201.pizzeria.service.ResultadoStock
@@ -72,5 +73,15 @@ class MensajesPedidoConsola(private val lector: LectorConsola) {
 
     fun avisarSinRepartidor() {
         println("No hay repartidores disponibles en este momento. Tu pedido queda en preparación y será asignado cuando un repartidor se libere.")
+    }
+
+    fun mostrarNotificacionCliente(pedido: Pedido) {
+        val telefono: String = pedido.cliente.telefono
+        val mensaje: String = if (telefono == LectorConsola.TELEFONO_NO_INFORMADO) {
+            "No se pudo enviar la notificación: teléfono no informado."
+        } else {
+            "Notificación enviada al cliente ($telefono): Su pedido N° ${pedido.idPedido} está en estado ${pedido.estadoPedido.descripcion}."
+        }
+        println(mensaje)
     }
 }

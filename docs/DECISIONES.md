@@ -14,12 +14,16 @@ El catálogo de pizzas y la lista de repartidores se cargan desde archivos CSV u
 - Cada pizza preparada consume 1 porción.
 - Se maneja un solo tamaño: Familiar.
 
+
+
 ## 4. Descuento
 
 - Se aplica un descuento de 10% cuando `cantidadPizzas` es mayor que 3.
 - Bajo el título del catálogo se muestra la promoción vigente.
 - Tras confirmar el stock, si corresponde, se informa que el descuento fue aplicado.
 - El porcentaje y el umbral se toman de las constantes de `CalculadoraPedido`, por lo que los mensajes se mantienen consistentes con el cálculo.
+
+
 
 ## 5. Identificador del pedido
 
@@ -31,6 +35,8 @@ El catálogo de pizzas y la lista de repartidores se cargan desde archivos CSV u
 - Si no hay ninguno, se informa: "No hay repartidores disponibles en este momento. Tu pedido queda en preparación y será asignado cuando un repartidor se libere."
 - En el resumen, el campo repartidor muestra "Sin repartidor disponible".
 
+
+
 ## 7. Falta de stock
 
 - Si el stock no alcanza, se informan la cantidad solicitada y la disponible, y se indica que el pedido no puede completarse con la cantidad solicitada.
@@ -39,6 +45,8 @@ El catálogo de pizzas y la lista de repartidores se cargan desde archivos CSV u
   - Con `n`, se muestra "Pedido cancelado." y el programa termina sin resumen.
 - Solo se aceptan `s` o `n`. Si la entrada termina, se asume `n`.
 - Un pedido rechazado no modifica el stock.
+
+
 
 ## 8. Validación del teléfono
 
@@ -51,6 +59,8 @@ El teléfono debe tener formato chileno: 9 dígitos, con o sin prefijo `+56` o `
 - El resumen se mantiene en `Main.kt` por exigencia del Paso 6, como única excepción a la regla de capas.
 - El resumen muestra el tamaño Familiar en la sección de la pizza.
 
+
+
 ## 10. Lectura de consola
 
 Se decidió usar `readlnOrNull()`, equivalente actual de `readLine()` (deprecada en la versión de Kotlin del proyecto).
@@ -61,6 +71,8 @@ Se decidió usar `readlnOrNull()`, equivalente actual de `readLine()` (deprecada
 - Dirección: mínimo 5 caracteres y al menos una letra.
 - Si el dato no cumple, se muestra el motivo y se vuelve a pedir.
 
+
+
 ## 12. Cantidad por pedido
 
 Entre 1 y 20 pizzas (`MAXIMO_PIZZAS_POR_PEDIDO`). No se limita al stock, para que la verificación de ingredientes del Paso 4 se aplique siempre.
@@ -68,6 +80,10 @@ Entre 1 y 20 pizzas (`MAXIMO_PIZZAS_POR_PEDIDO`). No se limita al stock, para qu
 ## 13. Numeración del enunciado
 
 Las instrucciones pasan del Paso 4 al Paso 6. Se interpretó como un error de numeración. La asignación de repartidor se implementó porque el Paso 6 la exige en el resumen.
+
+## 14. Notificación al cliente
+
+Notificación al cliente simulada por consola.
 
 ## Mejoras futuras (posibles)
 

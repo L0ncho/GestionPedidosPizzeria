@@ -83,6 +83,7 @@ fun main() {
         repartidor = repartidor
     )
 
+    mensajes.mostrarNotificacionCliente(pedido)
     mostrarResumen(pedido, calculo)
 }
 
