@@ -56,7 +56,7 @@ El teléfono debe tener formato chileno: 9 dígitos, con o sin prefijo `+56` o `
 
 - Los mensajes de consola se implementaron en la capa `ui` (`MensajesPedidoConsola`, `RegistroClienteConsola`, `MenuPizzasConsola`).
 - `Main.kt` solo orquesta el flujo y genera el resumen.
-- El resumen se mantiene en `Main.kt` por exigencia del Paso 6, como única excepción a la regla de capas.
+- El resumen se mantiene en `Main.kt`, como única excepción a la regla de capas.
 - El resumen muestra el tamaño Familiar en la sección de la pizza.
 
 
@@ -77,11 +77,7 @@ Se decidió usar `readlnOrNull()`, equivalente actual de `readLine()` (deprecada
 
 Entre 1 y 20 pizzas (`MAXIMO_PIZZAS_POR_PEDIDO`). No se limita al stock, para que la verificación de ingredientes del Paso 4 se aplique siempre.
 
-## 13. Numeración del enunciado
-
-Las instrucciones pasan del Paso 4 al Paso 6. Se interpretó como un error de numeración. La asignación de repartidor se implementó porque el Paso 6 la exige en el resumen.
-
-## 14. Notificación al cliente
+## 13. Notificación al cliente
 
 Notificación al cliente simulada por consola.
 
