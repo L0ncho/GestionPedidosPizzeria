@@ -1,91 +1,71 @@
 # Decisiones de diseño — GestionPedidosPizzeria
 
-## 1. Alcance del pedido
+## 1. Descripción
 
-Se decidió que cada ejecución registre un único pedido, compuesto por un tipo de pizza y su cantidad.
+Aplicación de consola de uso interno para el personal de una pizzería. Permite registrar pedidos, revisar el reporte del día, avanzar el estado de cada pedido y reabastecer el inventario de ingredientes. Por ahora no incluye inicio de sesión.
 
-## 2. Fuente de datos
+## 2. Decisiones vigentes
 
-El catálogo de pizzas y la lista de repartidores se cargan desde archivos CSV ubicados en `resources`, con separador `;`, codificación UTF-8 y fila de encabezado. Las filas inválidas se informan como errores de carga y se omiten.
+### Menú y pedidos del día
 
-## 3. Stock de ingredientes
+- **Menú principal:** 1. Registrar pedido, 2. Reporte del día, 3. Cambiar estado de un pedido, 4. Inventario, 5. Salir. El menú se repite hasta elegir Salir.
+- **Pedidos del día:** se guardan en un arreglo con capacidad para 100 pedidos. Al llegar al máximo, se informa que no se pueden registrar más pedidos.
+- **Identificador:** el N° de pedido es autoincremental y parte en 1.
+- **Reporte del día:** lista cada pedido con su N°, cliente, pizzas, total y estado, y luego los agrupa en completados (Entregado) y pendientes.
 
-- `ingredientesDisponibles` representa la cantidad de pizzas que se pueden preparar durante el turno.
-- Cada pizza preparada consume 1 porción.
-- Se maneja un solo tamaño: Familiar.
+### Registro del pedido
 
+- **Cliente:** cada pedido registra al cliente con sus datos validados.
+- **Validaciones:** cada dato se vuelve a pedir mientras no sea válido.
+  - Nombre: solo letras (incluidas tildes, ñ y ü), espacios, `'` y `-`; mínimo 2 caracteres y al menos una letra.
+  - Dirección: mínimo 5 caracteres y al menos una letra.
+  - Teléfono: formato chileno de 9 dígitos, con o sin prefijo `+56` o `56`; se guarda como `+56XXXXXXXXX`. Tras 3 intentos inválidos se registra `+56 9 0000 0000`.
+  - Correo: opcional (Enter para omitir) y con formato `usuario@dominio.ext`. Tras 3 intentos inválidos se registra `sin.correo@example.com`.
+- **Productos:** un pedido puede tener varios productos, cada uno con su cantidad. Si se elige un producto ya agregado, se suma la cantidad. El total no puede superar 20 pizzas.
+- **Notas:** son opcionales; si no se ingresan, se muestra "Sin notas".
 
+### Inventario y verificación de ingredientes
 
-## 4. Descuento
+- **Datos de origen:** el catálogo, las recetas, el inventario y los repartidores se cargan desde archivos CSV (separador `;`, UTF-8, con encabezado). Las filas inválidas se informan como errores de carga y se omiten; una pizza sin receta no se ofrece.
+- **Inventario por ingrediente:** cada ingrediente tiene su cantidad disponible y su unidad (`g` o `unidades`). Cada pizza tiene una receta con la cantidad de cada ingrediente.
+- **Verificación:** se verifica al agregar cada pizza (considerando lo ya agregado al pedido) y nuevamente al registrar el pedido. Los ingredientes solo se descuentan cuando el pedido queda registrado.
+- **Ingredientes faltantes:** se informa cada ingrediente que falta y cuánto, por ejemplo "Queso azul (faltan 30 g)", junto con los pasos para reabastecer.
+- **Opciones al faltar ingredientes:** elegir otro producto o una cantidad menor, terminar el pedido con los productos ya agregados (solo si hay alguno) o cancelar el pedido.
+- **Reabastecimiento:** desde la opción Inventario se elige un ingrediente y se ingresa la cantidad recibida, que debe ser un número entero mayor que 0.
 
-- Se aplica un descuento de 10% cuando `cantidadPizzas` es mayor que 3.
-- Bajo el título del catálogo se muestra la promoción vigente.
-- Tras confirmar el stock, si corresponde, se informa que el descuento fue aplicado.
-- El porcentaje y el umbral se toman de las constantes de `CalculadoraPedido`, por lo que los mensajes se mantienen consistentes con el cálculo.
+### Precios, descuento y resumen
 
+- **Descuento:** 10% en pedidos de más de 3 pizzas. La promoción se muestra junto al catálogo.
+- **Impuestos:** los precios incluyen IVA (19%), que se desglosa en neto e IVA.
+- **Resumen del pedido:** muestra cliente (nombre, teléfono, correo y dirección), productos (nombre, cantidad, precio unitario y subtotal), notas, subtotal, descuento si corresponde, total, neto, IVA, estado y repartidor.
 
+### Repartidores y estados
 
-## 5. Identificador del pedido
+- **Asignación:** se asigna el repartidor disponible más cercano a la pizzería, según una distancia simulada. Si no hay ninguno, el pedido queda sin repartidor y se informa.
+- **Estados:** avanzan en orden: En preparación → Listo → En camino → Entregado.
+  - Para pasar de Listo a En camino el pedido necesita repartidor; si no tiene, se intenta asignar uno en ese momento.
+  - Al entregar el pedido, el repartidor vuelve a quedar disponible.
+  - En la opción 3 se puede ingresar 0 para volver al menú sin cambios.
+- **Notificación:** al registrar el pedido se simula el envío de una notificación al correo del cliente. Si el cliente no tiene correo o tiene el correo por defecto, se informa que no se envió.
 
-`idPedido` es autoincremental y parte en 1.
+### Datos
 
-## 6. Asignación de repartidor
+- **Solo en memoria:** pedidos, inventario y disponibilidad de repartidores se mantienen mientras la aplicación está abierta; al cerrarla, los cambios se pierden.
 
-- Se asigna el primer repartidor disponible y se marca como no disponible.
-- Si no hay ninguno, se informa: "No hay repartidores disponibles en este momento. Tu pedido queda en preparación y será asignado cuando un repartidor se libere."
-- En el resumen, el campo repartidor muestra "Sin repartidor disponible".
+## 3. Errores encontrados en pruebas y su resolución
 
+- **Revisión tardía de ingredientes:** la falta se detectaba al final del pedido; ahora se verifica al agregar cada pizza.
+- **Sin forma de cancelar o terminar el pedido:** al faltar ingredientes ahora se puede elegir otro producto, terminar con lo agregado o cancelar.
+- **Repartidores que no se liberaban:** ahora el repartidor vuelve a quedar disponible al entregar el pedido.
+- **Pedido sin repartidor detenido en Listo:** ahora se intenta asignar un repartidor al despacharlo.
+- **Búsqueda de clientes precargados que confundía el flujo:** se eliminó; cada pedido registra al cliente.
+- **Sin forma de salir de la opción 3:** ahora se puede ingresar 0 para volver al menú.
 
+## 4. Mejoras futuras
 
-## 7. Falta de stock
-
-- Si el stock no alcanza, se informan la cantidad solicitada y la disponible, y se indica que el pedido no puede completarse con la cantidad solicitada.
-- Se implementó un reintento: se pregunta "¿Desea modificar el pedido? (s/n)".
-  - Con `s`, se vuelve a elegir pizza y cantidad.
-  - Con `n`, se muestra "Pedido cancelado." y el programa termina sin resumen.
-- Solo se aceptan `s` o `n`. Si la entrada termina, se asume `n`.
-- Un pedido rechazado no modifica el stock.
-
-
-
-## 8. Validación del teléfono
-
-El teléfono debe tener formato chileno: 9 dígitos, con o sin prefijo `+56` o `56`, y se normaliza como `+56XXXXXXXXX`. Después de 3 intentos inválidos se registra como "No informado".
-
-## 9. Organización de la consola y resumen
-
-- Los mensajes de consola se implementaron en la capa `ui` (`MensajesPedidoConsola`, `RegistroClienteConsola`, `MenuPizzasConsola`).
-- `Main.kt` solo orquesta el flujo y genera el resumen.
-- El resumen se mantiene en `Main.kt`, como única excepción a la regla de capas.
-- El resumen muestra el tamaño Familiar en la sección de la pizza.
-
-
-
-## 10. Lectura de consola
-
-Se decidió usar `readlnOrNull()`, equivalente actual de `readLine()` (deprecada en la versión de Kotlin del proyecto).
-
-## 11. Validación de nombre y dirección
-
-- Nombre: solo letras (incluidas tildes, ñ y ü), espacios, `'` y `-`; mínimo 2 caracteres y al menos una letra.
-- Dirección: mínimo 5 caracteres y al menos una letra.
-- Si el dato no cumple, se muestra el motivo y se vuelve a pedir.
-
-
-
-## 12. Cantidad por pedido
-
-Entre 1 y 20 pizzas (`MAXIMO_PIZZAS_POR_PEDIDO`). No se limita al stock, para que la verificación de ingredientes del Paso 4 se aplique siempre.
-
-## 13. Notificación al cliente
-
-Notificación al cliente simulada por consola.
-
-## Mejoras futuras (posibles)
-
-- **Tamaños de pizza:** incorporar tamaños distintos al Familiar, con su precio y consumo de ingredientes.
-- **Fichas técnicas por ingrediente:** reemplazar el stock por pizza por un inventario de ingredientes y una receta por pizza.
-- **Varios sabores por pedido:** agregar un detalle de pedido con una línea por pizza y su cantidad.
-- **Varios pedidos por ejecución:** permitir registrar más de un pedido sin reiniciar el programa.
-- **Persistencia de datos:** guardar pedidos, stock y disponibilidad de repartidores entre ejecuciones.
-
+- **Registro persistente de clientes:** identificación única por teléfono, sin duplicados.
+- **Estado Cancelado:** permitir cancelar pedidos ya registrados y devolver sus ingredientes al inventario.
+- **Catálogo:** mostrar las unidades de cada ingrediente y mejorar el formato del catálogo.
+- **Login y roles:** inicio de sesión con roles diferenciados para el personal.
+- **Ubicación real de repartidores:** reemplazar la distancia simulada por la ubicación real de cada repartidor.
+- **Persistencia de datos:** guardar pedidos, inventario y disponibilidad de repartidores entre ejecuciones.

@@ -1,5 +1,10 @@
 package cl.duoc.pmy2201.pizzeria.ui
 
+import cl.duoc.pmy2201.pizzeria.util.CORREO_POR_DEFECTO
+import cl.duoc.pmy2201.pizzeria.util.TELEFONO_POR_DEFECTO
+import cl.duoc.pmy2201.pizzeria.util.esCorreoValido
+import cl.duoc.pmy2201.pizzeria.util.normalizarTelefono
+
 /**
  * Lee y valida datos ingresados por consola.
  */
@@ -29,6 +34,16 @@ class LectorConsola {
     }
 
     /**
+     * Pide un texto opcional y lo devuelve sin espacios al inicio ni al final.
+     * Si se presiona Enter sin escribir nada, o si la entrada termina, retorna null.
+     */
+    fun leerTextoOpcional(mensaje: String): String? {
+        print(mensaje)
+        val texto: String = readlnOrNull()?.trim() ?: return null
+        return texto.ifEmpty { null }
+    }
+
+    /**
      * Pide un número entero entre [minimo] y [maximo] (ambos incluidos), repitiendo hasta obtenerlo.
      * Si la entrada termina (readlnOrNull() devuelve null), retorna [minimo].
      */
@@ -53,34 +68,51 @@ class LectorConsola {
 
     /**
      * Pide un teléfono chileno de 9 dígitos, con o sin prefijo +56 o 56, y lo devuelve como +56XXXXXXXXX.
-     * Tras [MAXIMO_INTENTOS_TELEFONO] intentos inválidos, o si la entrada termina, retorna [TELEFONO_NO_INFORMADO].
+     * Tras [MAXIMO_INTENTOS] intentos inválidos, o si la entrada termina, retorna [TELEFONO_POR_DEFECTO].
      */
     fun leerTelefono(mensaje: String): String {
-        for (intento: Int in 1..MAXIMO_INTENTOS_TELEFONO) {
+        for (intento: Int in 1..MAXIMO_INTENTOS) {
             print(mensaje)
             val entrada: String? = readlnOrNull()
             if (entrada == null) {
-                println("No se recibió teléfono. Se registrará como \"$TELEFONO_NO_INFORMADO\".")
-                return TELEFONO_NO_INFORMADO
+                println("No se recibió teléfono. Se registrará como $TELEFONO_POR_DEFECTO.")
+                return TELEFONO_POR_DEFECTO
             }
 
-            val sinEspacios: String = entrada.filterNot { caracter: Char -> caracter.isWhitespace() }
-            val coincidencia: MatchResult? = FORMATO_TELEFONO.matchEntire(sinEspacios)
-            if (coincidencia != null) return "$PREFIJO_CHILE${coincidencia.groupValues[1]}"
+            val telefono: String? = normalizarTelefono(entrada.trim())
+            if (telefono != null) return telefono
 
-            val intentosRestantes: Int = MAXIMO_INTENTOS_TELEFONO - intento
+            val intentosRestantes: Int = MAXIMO_INTENTOS - intento
             if (intentosRestantes > 0) {
                 println("Teléfono inválido. Ingrese 9 dígitos, con o sin +56. Intentos restantes: $intentosRestantes.")
             }
         }
-        println("Se agotaron los intentos. El teléfono se registrará como \"$TELEFONO_NO_INFORMADO\".")
-        return TELEFONO_NO_INFORMADO
+        println("Se agotaron los intentos. El teléfono se registrará como $TELEFONO_POR_DEFECTO.")
+        return TELEFONO_POR_DEFECTO
+    }
+
+    /**
+     * Pide un correo opcional y lo devuelve sin espacios y en minúsculas.
+     * Si se presiona Enter sin escribir nada, o si la entrada termina, retorna null (sin correo).
+     * Tras [MAXIMO_INTENTOS] intentos inválidos, retorna [CORREO_POR_DEFECTO].
+     */
+    fun leerCorreo(mensaje: String): String? {
+        for (intento: Int in 1..MAXIMO_INTENTOS) {
+            print(mensaje)
+            val texto: String = readlnOrNull()?.trim() ?: return null
+            if (texto.isEmpty()) return null
+            if (esCorreoValido(texto)) return texto.lowercase()
+
+            val intentosRestantes: Int = MAXIMO_INTENTOS - intento
+            if (intentosRestantes > 0) {
+                println("Correo inválido. Use el formato usuario@dominio.ext o presione Enter para omitirlo. Intentos restantes: $intentosRestantes.")
+            }
+        }
+        println("Se agotaron los intentos. El correo se registrará como $CORREO_POR_DEFECTO.")
+        return CORREO_POR_DEFECTO
     }
 
     companion object {
-        const val MAXIMO_INTENTOS_TELEFONO: Int = 3
-        const val TELEFONO_NO_INFORMADO: String = "No informado"
-        private const val PREFIJO_CHILE: String = "+56"
-        private val FORMATO_TELEFONO: Regex = Regex("""^(?:\+?56)?(\d{9})$""")
+        const val MAXIMO_INTENTOS: Int = 3
     }
 }

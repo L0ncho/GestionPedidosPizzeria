@@ -1,4 +1,4 @@
-package cl.duoc.pmy2201.pizzeria.ui
+package cl.duoc.pmy2201.pizzeria.util
 
 import java.math.RoundingMode
 import java.text.DecimalFormat

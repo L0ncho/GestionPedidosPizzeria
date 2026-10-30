@@ -9,12 +9,13 @@ import cl.duoc.pmy2201.pizzeria.model.Repartidor
 class AsignacionRepartidorService(private val repartidorRepository: RepartidorRepository) {
 
     /**
-     * Toma el primer repartidor disponible, lo marca como no disponible y lo retorna.
+     * Toma el repartidor disponible más cercano (menor distanciaKm), lo marca como no disponible y lo retorna.
      * Retorna null si no hay ninguno disponible.
      */
     fun asignar(): Repartidor? {
         val repartidor: Repartidor? = repartidorRepository.obtenerTodos()
-            .firstOrNull { candidato: Repartidor -> candidato.disponible }
+            .sortedBy { candidato: Repartidor -> candidato.distanciaKm }
+            .find { candidato: Repartidor -> candidato.disponible }
         repartidor?.disponible = false
         return repartidor
     }

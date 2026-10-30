@@ -1,18 +1,20 @@
 package cl.duoc.pmy2201.pizzeria.ui
 
+import cl.duoc.pmy2201.pizzeria.model.EstadoPedido
+import cl.duoc.pmy2201.pizzeria.model.PORCENTAJE_DESCUENTO
 import cl.duoc.pmy2201.pizzeria.model.Pedido
-import cl.duoc.pmy2201.pizzeria.model.Pizza
-import cl.duoc.pmy2201.pizzeria.service.CalculadoraPedido
-import cl.duoc.pmy2201.pizzeria.service.ResultadoStock
+import cl.duoc.pmy2201.pizzeria.service.PedidoService
+import cl.duoc.pmy2201.pizzeria.service.ResultadoVerificacion
+import cl.duoc.pmy2201.pizzeria.util.CORREO_POR_DEFECTO
 import kotlin.math.roundToInt
 
 /**
- * Mensajes por consola del flujo de un pedido.
+ * Mensajes por consola del sistema de gestión de pedidos.
  */
-class MensajesPedidoConsola(private val lector: LectorConsola) {
+class MensajesPedidoConsola {
 
     fun mostrarBienvenida() {
-        println("Pizzería - Gestión de Pedidos")
+        println("Sistema de gestión - Pizzería (uso interno)")
     }
 
     /** Muestra [errores] como lista; no muestra nada si está vacía. */
@@ -23,65 +25,101 @@ class MensajesPedidoConsola(private val lector: LectorConsola) {
         errores.forEach { error: String -> println("- $error") }
     }
 
-    fun mostrarSinPizzas() {
-        println("No hay pizzas disponibles en el catálogo. El programa finaliza.")
+    fun mostrarSinProductos() {
+        println("No hay productos disponibles en el catálogo. El programa finaliza.")
     }
 
-    /**
-     * Informa el resultado de la verificación de stock.
-     * Retorna true si el pedido quedó confirmado.
-     */
-    fun mostrarResultadoStock(pizza: Pizza, resultado: ResultadoStock): Boolean {
+    fun mostrarDespedida() {
+        println("Sesión finalizada. ¡Hasta luego!")
+    }
+
+    fun mostrarMenuPrincipal() {
         println()
-        return when (resultado) {
-            is ResultadoStock.Rechazado -> {
-                println("No hay ingredientes suficientes para ${pizza.nombrePizza}.")
-                println("Solicitadas: ${resultado.cantidadSolicitada} | Disponibles: ${resultado.stockDisponible}")
-                println("El pedido no puede completarse con la cantidad solicitada.")
-                false
-            }
-            is ResultadoStock.Confirmado -> {
-                println("Pedido confirmado")
-                println("Stock restante de ${pizza.nombrePizza}: ${resultado.stockRestante}")
-                true
-            }
-        }
+        println("Menú principal")
+        println("1. Registrar pedido")
+        println("2. Reporte del día")
+        println("3. Cambiar estado de un pedido")
+        println("4. Inventario")
+        println("5. Salir")
     }
 
     /**
-     * Pregunta si se desea modificar el pedido, aceptando solo s o n.
-     * Retorna true si la respuesta es s. Si la entrada termina, se asume n.
+     * Lista los ingredientes faltantes de [resultado], por ejemplo "Queso azul (faltan 30 g)",
+     * y explica cómo reabastecer. [unidadDe] entrega la unidad de cada ingrediente, o null si no se conoce.
      */
-    fun preguntarModificarPedido(): Boolean {
-        val respuesta: String = lector.leerTextoObligatorio(
-            mensaje = "¿Desea modificar el pedido? (s/n): ",
-            valorPorDefecto = "n",
-            validacion = { texto: String -> texto.lowercase() in setOf("s", "n") },
-            mensajeError = "Respuesta inválida. Ingrese s o n."
-        ).lowercase()
-        return respuesta == "s"
+    fun mostrarIngredientesInsuficientes(resultado: ResultadoVerificacion.Insuficiente, unidadDe: (String) -> String?) {
+        println()
+        println("No hay ingredientes suficientes para el pedido. Faltan:")
+        resultado.ingredientesFaltantes.forEach { ingrediente: String ->
+            val cantidad: Int = resultado.faltantes.getValue(ingrediente)
+            val unidad: String = unidadDe(ingrediente) ?: ""
+            println("- $ingrediente (faltan ${"$cantidad $unidad".trim()})")
+        }
+        println()
+        println("Para reabastecer:")
+        println("1. Cancelar el pedido y volver al menú principal.")
+        println("2. Elegir la opción 4. Inventario.")
+        println("3. Seleccionar el ingrediente e ingresar la cantidad recibida.")
+    }
+
+    fun mostrarDescuentoAplicado() {
+        val porcentajeDescuento: Int = (PORCENTAJE_DESCUENTO * 100).roundToInt()
+        println("Se aplicó un $porcentajeDescuento% de descuento al pedido.")
     }
 
     fun mostrarPedidoCancelado() {
         println("Pedido cancelado.")
     }
 
-    fun mostrarDescuentoAplicado() {
-        val porcentajeDescuento: Int = (CalculadoraPedido.PORCENTAJE_DESCUENTO * 100).roundToInt()
-        println("¡Se aplicó un $porcentajeDescuento% de descuento a tu pedido!")
+    fun mostrarSinRepartidor() {
+        println("No hay repartidores disponibles en este momento. El pedido queda en preparación sin repartidor asignado.")
     }
 
-    fun avisarSinRepartidor() {
-        println("No hay repartidores disponibles en este momento. Tu pedido queda en preparación y será asignado cuando un repartidor se libere.")
+    /**
+     * Simula el envío de una notificación al correo del cliente. No se envía si el cliente
+     * no tiene correo o si tiene [CORREO_POR_DEFECTO].
+     */
+    fun mostrarNotificacion(pedido: Pedido) {
+        pedido.cliente.correo
+            ?.takeIf { correo: String -> correo != CORREO_POR_DEFECTO }
+            ?.let { correo: String ->
+                println("Notificación enviada a $correo: Su pedido N° ${pedido.idPedido} está en estado ${pedido.estado.descripcion}.")
+            }
+            ?: println("No se envió notificación: el cliente no tiene correo registrado.")
     }
 
-    fun mostrarNotificacionCliente(pedido: Pedido) {
-        val telefono: String = pedido.cliente.telefono
-        val mensaje: String = if (telefono == LectorConsola.TELEFONO_NO_INFORMADO) {
-            "No se pudo enviar la notificación: teléfono no informado."
-        } else {
-            "Notificación enviada al cliente ($telefono): Su pedido N° ${pedido.idPedido} está en estado ${pedido.estadoPedido.descripcion}."
-        }
-        println(mensaje)
+    /** Lista los [pedidos] pendientes con su N° y estado. */
+    fun mostrarPedidosPendientes(pedidos: List<Pedido>) {
+        println()
+        println("Pedidos pendientes:")
+        pedidos.forEach { pedido: Pedido -> println("N° ${pedido.idPedido} - ${pedido.estado.descripcion}") }
+    }
+
+    fun mostrarSinPedidosPendientes() {
+        println("No hay pedidos pendientes.")
+    }
+
+    fun mostrarPedidoNoEncontrado() {
+        println("Pedido no encontrado")
+    }
+
+    fun mostrarNoSePuedeDespachar() {
+        println("No se puede despachar: el pedido no tiene repartidor asignado.")
+    }
+
+    fun mostrarNoSePuedeEntregar() {
+        println("No se puede entregar: el pedido no tiene repartidor asignado.")
+    }
+
+    fun mostrarPedidoYaEntregado(pedido: Pedido) {
+        println("El pedido N° ${pedido.idPedido} ya fue entregado.")
+    }
+
+    fun mostrarCambioEstado(pedido: Pedido, estadoAnterior: EstadoPedido) {
+        println("Pedido N° ${pedido.idPedido}: ${estadoAnterior.descripcion} → ${pedido.estado.descripcion}")
+    }
+
+    fun mostrarSinCapacidad() {
+        println("Se alcanzó la capacidad máxima de ${PedidoService.CAPACIDAD_PEDIDOS_DIA} pedidos del día. No se pueden registrar más pedidos.")
     }
 }

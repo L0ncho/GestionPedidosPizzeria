@@ -1,22 +1,51 @@
 package cl.duoc.pmy2201.pizzeria.model
 
 /**
- * Pedido de un cliente: una pizza por una cantidad.
+ * Pedido de un cliente, con uno o más productos.
  *
  * @property idPedido Identificador autoincremental del pedido.
  * @property cliente Cliente que realiza el pedido.
- * @property pizza Pizza solicitada.
- * @property cantidadPizzas Cantidad de pizzas solicitadas.
- * @property totalPedido Total a pagar, con descuento aplicado si corresponde.
- * @property estadoPedido Estado actual del pedido.
+ * @property items Productos solicitados, cada uno con su cantidad.
+ * @property notas Notas opcionales del pedido.
  * @property repartidor Repartidor asignado, o null si no hay ninguno disponible.
  */
-data class Pedido(
+class Pedido(
     val idPedido: Int,
     val cliente: Cliente,
-    val pizza: Pizza,
-    val cantidadPizzas: Int,
-    val totalPedido: Double,
-    var estadoPedido: EstadoPedido,
-    var repartidor: Repartidor?
-)
+    val items: List<ItemPedido>,
+    val notas: String?,
+    var repartidor: Repartidor? = null
+) {
+
+    var estado: EstadoPedido = EstadoPedido.EN_PREPARACION
+        private set
+
+    val notasParaMostrar: String
+        get() = notas?.trim()?.takeIf { texto: String -> texto.isNotEmpty() } ?: "Sin notas"
+
+    fun cantidadPizzas(): Int = items.sumOf { item: ItemPedido -> item.cantidad }
+
+    fun calcularTotal(): TotalesPedido {
+        val subtotal: Double = items.sumOf { item: ItemPedido -> item.subtotal() }
+        return calcularTotales(subtotal = subtotal, cantidadPizzas = cantidadPizzas())
+    }
+
+    /**
+     * Retorna el estado que sigue al actual, o null si el pedido ya fue entregado.
+     */
+    fun siguienteEstado(): EstadoPedido? = when (estado) {
+        EstadoPedido.EN_PREPARACION -> EstadoPedido.LISTO
+        EstadoPedido.LISTO -> EstadoPedido.EN_CAMINO
+        EstadoPedido.EN_CAMINO -> EstadoPedido.ENTREGADO
+        EstadoPedido.ENTREGADO -> null
+    }
+
+    /**
+     * Avanza al siguiente estado. Retorna false si el pedido ya fue entregado.
+     */
+    fun cambiarEstado(): Boolean {
+        val siguiente: EstadoPedido = siguienteEstado() ?: return false
+        estado = siguiente
+        return true
+    }
+}

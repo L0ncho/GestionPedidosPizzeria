@@ -1,0 +1,30 @@
+pizza;ingrediente;cantidad
+Pepperoni;Masa;1
+Pepperoni;Salsa de tomate;150
+Pepperoni;Queso mozzarella;250
+Pepperoni;Pepperoni;100
+Cuatro Quesos;Masa;1
+Cuatro Quesos;Salsa de tomate;150
+Cuatro Quesos;Queso mozzarella;150
+Cuatro Quesos;Queso gouda;80
+Cuatro Quesos;Queso parmesano;60
+Cuatro Quesos;Queso azul;60
+Napolitana;Masa;1
+Napolitana;Salsa de tomate;150
+Napolitana;Queso mozzarella;250
+Napolitana;Tomate;150
+Napolitana;Aceitunas;50
+Napolitana;Orégano;3
+Hawaiana;Masa;1
+Hawaiana;Salsa de tomate;150
+Hawaiana;Queso mozzarella;250
+Hawaiana;Jamón;120
+Hawaiana;Piña;120
+Vegetariana;Masa;1
+Vegetariana;Salsa de tomate;150
+Vegetariana;Queso mozzarella;200
+Vegetariana;Pimentón;80
+Vegetariana;Champiñón;100
+Vegetariana;Cebolla;60
+Vegetariana;Choclo;60
+Vegetariana;Aceitunas;40

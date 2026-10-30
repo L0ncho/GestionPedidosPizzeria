@@ -39,17 +39,20 @@ class RepartidorRepositoryCsv(
         val nombre: String = fila[1]
         val telefono: String = fila[2]
         val disponible: Boolean? = fila[3].toBooleanStrictOrNull()
+        val distanciaKm: Double? = fila[4].toDoubleOrNull()
 
         return if (
             id != null && id > 0 &&
             nombre.isNotEmpty() &&
-            disponible != null
+            disponible != null &&
+            distanciaKm != null && distanciaKm >= 0
         ) {
             Repartidor(
                 id = id,
                 nombre = nombre,
                 telefono = telefono,
-                disponible = disponible
+                disponible = disponible,
+                distanciaKm = distanciaKm
             )
         } else {
             null
@@ -63,6 +66,6 @@ class RepartidorRepositoryCsv(
 
     private companion object {
         const val NOMBRE_ARCHIVO: String = "repartidores.csv"
-        const val CANTIDAD_COLUMNAS: Int = 4
+        const val CANTIDAD_COLUMNAS: Int = 5
     }
 }

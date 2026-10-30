@@ -8,7 +8,7 @@ import cl.duoc.pmy2201.pizzeria.model.Cliente
 class RegistroClienteConsola(private val lector: LectorConsola) {
 
     /**
-     * Pide nombre, dirección y teléfono, muestra los datos registrados y retorna el [Cliente].
+     * Pide nombre, dirección, teléfono y correo, muestra los datos registrados y retorna el [Cliente].
      */
     fun registrar(): Cliente {
         println()
@@ -25,14 +25,13 @@ class RegistroClienteConsola(private val lector: LectorConsola) {
             mensajeError = "Dirección inválida. Debe tener al menos $LARGO_MINIMO_DIRECCION caracteres y al menos una letra."
         )
         val telefono: String = lector.leerTelefono("Teléfono de contacto: ")
+        val correo: String? = lector.leerCorreo("Correo (Enter para omitir): ")
 
-        val cliente: Cliente = Cliente(nombre = nombre, direccion = direccion, telefono = telefono)
+        val cliente: Cliente = Cliente(nombre = nombre, telefono = telefono, correo = correo, direccion = direccion)
 
         println()
         println("Cliente registrado")
-        println("Nombre: ${cliente.nombre}")
-        println("Dirección: ${cliente.direccion}")
-        println("Teléfono: ${cliente.telefono}")
+        println(cliente.describir())
 
         return cliente
     }

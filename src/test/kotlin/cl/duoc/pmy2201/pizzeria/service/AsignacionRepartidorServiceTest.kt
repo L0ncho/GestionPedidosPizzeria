@@ -18,21 +18,22 @@ class AsignacionRepartidorServiceTest {
     }
 
     private fun crearRepartidores(): List<Repartidor> = listOf(
-        Repartidor(id = 1, nombre = "Matías Rojas", telefono = "+56911111111", disponible = false),
-        Repartidor(id = 2, nombre = "Camila Fuentes", telefono = "+56922222222", disponible = true)
+        Repartidor(id = 1, nombre = "Matías Rojas", telefono = "+56911111111", disponible = true, distanciaKm = 3.5),
+        Repartidor(id = 2, nombre = "Camila Fuentes", telefono = "+56922222222", disponible = false, distanciaKm = 1.2),
+        Repartidor(id = 3, nombre = "Diego Soto", telefono = "+56933333333", disponible = true, distanciaKm = 2.0)
     )
 
     @Test
-    fun saltaAlNoDisponibleYMarcaAlAsignadoComoNoDisponible() {
+    fun asignaAlDisponibleMasCercanoYLoMarcaComoNoDisponible() {
         val repartidores: List<Repartidor> = crearRepartidores()
         val servicio: AsignacionRepartidorService = AsignacionRepartidorService(RepartidorRepositoryEnMemoria(repartidores))
 
         val asignado: Repartidor? = servicio.asignar()
 
         assertNotNull(asignado)
-        assertEquals(2, asignado.id)
+        assertEquals(3, asignado.id)
         assertFalse(asignado.disponible)
-        assertFalse(repartidores[1].disponible)
+        assertFalse(repartidores[2].disponible)
     }
 
     @Test
@@ -41,8 +42,9 @@ class AsignacionRepartidorServiceTest {
         val servicio: AsignacionRepartidorService = AsignacionRepartidorService(RepartidorRepositoryEnMemoria(repartidores))
 
         servicio.asignar()
-        val segundaAsignacion: Repartidor? = servicio.asignar()
+        servicio.asignar()
+        val terceraAsignacion: Repartidor? = servicio.asignar()
 
-        assertNull(segundaAsignacion)
+        assertNull(terceraAsignacion)
     }
 }
