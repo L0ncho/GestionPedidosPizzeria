@@ -10,7 +10,7 @@ import cl.duoc.pmy2201.pizzeria.util.FormatoMoneda
  * @property ingredientes Receta: nombre del ingrediente → cantidad para una unidad.
  * @property categoria Categoría a la que pertenece el producto.
  */
-class Producto(
+open class Producto(
     val nombre: String,
     val precio: Double,
     val ingredientes: Map<String, Int>,
@@ -19,13 +19,15 @@ class Producto(
 
     /**
      * Retorna una descripción completa, por ejemplo:
-     * "Pepperoni - $11.990 | Categoría: Pizza | Ingredientes: Masa (1), Salsa de tomate (150)".
+     * "Pepperoni - $11.990 | Categoría: Pizza | Ingredientes: Masa (1), Salsa de tomate (150) | Promocionable".
+     * El sufijo " | Promocionable" solo se agrega si [esPromocionable] es verdadero.
      */
     fun detallarProducto(): String {
         val detalleIngredientes: String = ingredientes.entries.joinToString(", ") { ingrediente: Map.Entry<String, Int> ->
             "${ingrediente.key} (${ingrediente.value})"
         }
-        return "$nombre - ${FormatoMoneda.formatear(precio)} | Categoría: ${categoria.descripcion} | Ingredientes: $detalleIngredientes"
+        val detallePromocion: String = if (esPromocionable(this)) " | Promocionable" else ""
+        return "$nombre - ${FormatoMoneda.formatear(precio)} | Categoría: ${categoria.descripcion} | Ingredientes: $detalleIngredientes$detallePromocion"
     }
 
     /**

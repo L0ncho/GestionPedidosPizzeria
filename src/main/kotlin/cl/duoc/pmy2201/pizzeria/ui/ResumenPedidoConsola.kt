@@ -2,10 +2,13 @@ package cl.duoc.pmy2201.pizzeria.ui
 
 import cl.duoc.pmy2201.pizzeria.model.Cliente
 import cl.duoc.pmy2201.pizzeria.model.ItemPedido
+import cl.duoc.pmy2201.pizzeria.model.PORCENTAJE_DESCUENTO
+import cl.duoc.pmy2201.pizzeria.model.PORCENTAJE_PROMOCION
 import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.model.TASA_IVA
 import cl.duoc.pmy2201.pizzeria.model.TotalesPedido
 import cl.duoc.pmy2201.pizzeria.util.FormatoMoneda
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 /**
@@ -21,6 +24,7 @@ class ResumenPedidoConsola {
         println()
         println(SEPARADOR)
         println("RESUMEN DEL PEDIDO N° ${pedido.idPedido}")
+        println("Fecha: ${pedido.fecha.format(FORMATO_FECHA)}")
         println(SEPARADOR)
 
         println("Cliente")
@@ -43,8 +47,13 @@ class ResumenPedidoConsola {
 
         println(SEPARADOR_SECCION)
         println("Subtotal: ${FormatoMoneda.formatear(totales.subtotal)}")
-        if (totales.descuento > 0) {
-            println("Descuento: -${FormatoMoneda.formatear(totales.descuento)}")
+        if (totales.descuentoCantidad > 0) {
+            val porcentajeCantidad: Int = (PORCENTAJE_DESCUENTO * 100).roundToInt()
+            println("Descuento por cantidad ($porcentajeCantidad%): -${FormatoMoneda.formatear(totales.descuentoCantidad)}")
+        }
+        if (totales.descuentoPromocion > 0) {
+            val porcentajePromocion: Int = (PORCENTAJE_PROMOCION * 100).roundToInt()
+            println("Descuento promoción ($porcentajePromocion%): -${FormatoMoneda.formatear(totales.descuentoPromocion)}")
         }
         println("Total: ${FormatoMoneda.formatear(totales.total)}")
         println("Neto: ${FormatoMoneda.formatear(totales.neto)}")
@@ -59,5 +68,6 @@ class ResumenPedidoConsola {
     private companion object {
         val SEPARADOR: String = "=".repeat(40)
         val SEPARADOR_SECCION: String = "-".repeat(40)
+        val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     }
 }

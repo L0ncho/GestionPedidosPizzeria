@@ -1,14 +1,20 @@
 package cl.duoc.pmy2201.pizzeria.ui
 
 import cl.duoc.pmy2201.pizzeria.model.Cliente
+import cl.duoc.pmy2201.pizzeria.service.ClienteService
 
 /**
  * Registra por consola los datos del cliente que realiza el pedido.
  */
-class RegistroClienteConsola(private val lector: LectorConsola) {
+class RegistroClienteConsola(
+    private val lector: LectorConsola,
+    private val clienteService: ClienteService
+) {
 
     /**
-     * Pide nombre, dirección, teléfono y correo, muestra los datos registrados y retorna el [Cliente].
+     * Pide nombre y correo. Si ya hay un cliente registrado con esos datos, lo muestra y lo reutiliza
+     * sin pedir dirección ni teléfono. Si no, pide dirección y teléfono, lo registra en [ClienteService],
+     * muestra los datos registrados y retorna el nuevo [Cliente].
      */
     fun registrar(): Cliente {
         println()
@@ -18,6 +24,16 @@ class RegistroClienteConsola(private val lector: LectorConsola) {
             validacion = { texto: String -> esNombreValido(texto) },
             mensajeError = "Nombre inválido. Use solo letras, espacios, ' o -, con al menos $LARGO_MINIMO_NOMBRE caracteres y al menos una letra."
         )
+        val correo: String? = lector.leerCorreo("Correo (Enter para omitir): ")
+
+        val existente: Cliente? = clienteService.buscar(nombre, correo)
+        if (existente != null) {
+            println()
+            println("Cliente ya registrado:")
+            println(existente.describir())
+            return existente
+        }
+
         val direccion: String = lector.leerTextoObligatorio(
             mensaje = "Dirección de entrega: ",
             valorPorDefecto = DIRECCION_POR_DEFECTO,
@@ -25,9 +41,9 @@ class RegistroClienteConsola(private val lector: LectorConsola) {
             mensajeError = "Dirección inválida. Debe tener al menos $LARGO_MINIMO_DIRECCION caracteres y al menos una letra."
         )
         val telefono: String = lector.leerTelefono("Teléfono de contacto: ")
-        val correo: String? = lector.leerCorreo("Correo (Enter para omitir): ")
 
         val cliente: Cliente = Cliente(nombre = nombre, telefono = telefono, correo = correo, direccion = direccion)
+        clienteService.registrar(cliente)
 
         println()
         println("Cliente registrado")

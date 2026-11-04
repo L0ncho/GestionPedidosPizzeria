@@ -1,5 +1,7 @@
 package cl.duoc.pmy2201.pizzeria.model
 
+import java.time.LocalDate
+
 /**
  * Pedido de un cliente, con uno o más productos.
  *
@@ -8,13 +10,15 @@ package cl.duoc.pmy2201.pizzeria.model
  * @property items Productos solicitados, cada uno con su cantidad.
  * @property notas Notas opcionales del pedido.
  * @property repartidor Repartidor asignado, o null si no hay ninguno disponible.
+ * @property fecha Fecha del pedido; por defecto, el día actual.
  */
 class Pedido(
     val idPedido: Int,
     val cliente: Cliente,
     val items: List<ItemPedido>,
     val notas: String?,
-    var repartidor: Repartidor? = null
+    var repartidor: Repartidor? = null,
+    val fecha: LocalDate = LocalDate.now()
 ) {
 
     var estado: EstadoPedido = EstadoPedido.EN_PREPARACION
@@ -25,9 +29,13 @@ class Pedido(
 
     fun cantidadPizzas(): Int = items.sumOf { item: ItemPedido -> item.cantidad }
 
+    /**
+     * Calcula los totales del pedido con su [fecha] (ver [calcularTotales]).
+     */
     fun calcularTotal(): TotalesPedido {
         val subtotal: Double = items.sumOf { item: ItemPedido -> item.subtotal() }
-        return calcularTotales(subtotal = subtotal, cantidadPizzas = cantidadPizzas())
+        val productos: List<Producto> = items.map { item: ItemPedido -> item.producto }
+        return calcularTotales(subtotal = subtotal, cantidadPizzas = cantidadPizzas(), productos = productos, fecha = fecha)
     }
 
     /**

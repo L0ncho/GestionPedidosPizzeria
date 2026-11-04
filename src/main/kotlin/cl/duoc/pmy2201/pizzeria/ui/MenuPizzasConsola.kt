@@ -1,13 +1,16 @@
 package cl.duoc.pmy2201.pizzeria.ui
 
 import cl.duoc.pmy2201.pizzeria.model.ItemPedido
+import cl.duoc.pmy2201.pizzeria.model.PERIODO_PROMOCION
 import cl.duoc.pmy2201.pizzeria.model.PORCENTAJE_DESCUENTO
+import cl.duoc.pmy2201.pizzeria.model.PORCENTAJE_PROMOCION
 import cl.duoc.pmy2201.pizzeria.model.Producto
 import cl.duoc.pmy2201.pizzeria.model.UMBRAL_PIZZAS_DESCUENTO
 import cl.duoc.pmy2201.pizzeria.service.InventarioService
 import cl.duoc.pmy2201.pizzeria.service.ResultadoVerificacion
 import cl.duoc.pmy2201.pizzeria.util.RANGO_CANTIDAD_PIZZAS
 import cl.duoc.pmy2201.pizzeria.util.esCantidadValida
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 /**
@@ -35,6 +38,13 @@ class MenuPizzasConsola(
         println("Catálogo de pizzas")
         val porcentajeDescuento: Int = (PORCENTAJE_DESCUENTO * 100).roundToInt()
         println("Promoción: $porcentajeDescuento% de descuento en pedidos de más de $UMBRAL_PIZZAS_DESCUENTO pizzas")
+        val porcentajePromocion: Int = (PORCENTAJE_PROMOCION * 100).roundToInt()
+        val inicioPromocion: String = PERIODO_PROMOCION.start.format(FORMATO_FECHA)
+        val finPromocion: String = PERIODO_PROMOCION.endInclusive.format(FORMATO_FECHA)
+        println(
+            "Promoción especial: $porcentajePromocion% de descuento del $inicioPromocion al $finPromocion " +
+                "en pedidos con pizzas promocionables."
+        )
         productos.forEachIndexed { indice: Int, producto: Producto ->
             println("${indice + 1}. ${producto.detallarProducto()}")
         }
@@ -129,5 +139,6 @@ class MenuPizzasConsola(
         private const val OPCION_TERMINAR: Int = 2
         private const val OPCION_CANCELAR: Int = 3
         private val RESPUESTAS_VALIDAS: Set<String> = setOf("s", "n")
+        private val FORMATO_FECHA: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
     }
 }

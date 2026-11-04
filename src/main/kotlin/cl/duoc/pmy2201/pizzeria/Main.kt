@@ -13,6 +13,7 @@ import cl.duoc.pmy2201.pizzeria.model.Pedido
 import cl.duoc.pmy2201.pizzeria.model.Producto
 import cl.duoc.pmy2201.pizzeria.model.Repartidor
 import cl.duoc.pmy2201.pizzeria.service.AsignacionRepartidorService
+import cl.duoc.pmy2201.pizzeria.service.ClienteService
 import cl.duoc.pmy2201.pizzeria.service.InventarioService
 import cl.duoc.pmy2201.pizzeria.service.PedidoService
 import cl.duoc.pmy2201.pizzeria.service.ResultadoRegistro
@@ -38,10 +39,11 @@ fun main() {
     val inventarioService: InventarioService = InventarioService(inventarioRepository)
     val asignacionRepartidorService: AsignacionRepartidorService = AsignacionRepartidorService(repartidorRepository)
     val pedidoService: PedidoService = PedidoService(inventarioService, asignacionRepartidorService)
+    val clienteService: ClienteService = ClienteService()
 
     val lector: LectorConsola = LectorConsola()
     val mensajes: MensajesPedidoConsola = MensajesPedidoConsola()
-    val registroClienteConsola: RegistroClienteConsola = RegistroClienteConsola(lector)
+    val registroClienteConsola: RegistroClienteConsola = RegistroClienteConsola(lector, clienteService)
     val menuPizzasConsola: MenuPizzasConsola = MenuPizzasConsola(
         lector = lector,
         inventarioService = inventarioService,
@@ -110,7 +112,7 @@ private fun registrarPedido(
     when (val resultado: ResultadoRegistro = pedidoService.registrarPedido(cliente, items, notas)) {
         is ResultadoRegistro.Registrado -> {
             val pedido: Pedido = resultado.pedido
-            if (pedido.calcularTotal().descuento > 0) {
+            if (pedido.calcularTotal().descuentoCantidad > 0) {
                 mensajes.mostrarDescuentoAplicado()
             }
             if (pedido.repartidor == null) {

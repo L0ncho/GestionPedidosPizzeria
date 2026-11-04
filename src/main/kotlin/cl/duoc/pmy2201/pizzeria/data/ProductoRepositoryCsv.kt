@@ -1,6 +1,7 @@
 package cl.duoc.pmy2201.pizzeria.data
 
-import cl.duoc.pmy2201.pizzeria.model.Categoria
+import cl.duoc.pmy2201.pizzeria.model.PizzaClasica
+import cl.duoc.pmy2201.pizzeria.model.PizzaEspecial
 import cl.duoc.pmy2201.pizzeria.model.Producto
 
 /**
@@ -33,13 +34,10 @@ class ProductoRepositoryCsv(
                 receta == null ->
                     errores.add("La pizza ${filaPizza.nombre} no tiene receta en $ARCHIVO_RECETAS y se omite.")
                 else -> {
-                    val producto: Producto = Producto(
-                        nombre = filaPizza.nombre,
-                        precio = filaPizza.precio,
-                        ingredientes = receta,
-                        categoria = Categoria.PIZZA
-                    )
-                    if (producto in productos) {
+                    val producto: Producto? = crearPizza(filaPizza, receta)
+                    if (producto == null) {
+                        errores.add("Fila ${indice + 1} con tipo inválido en $ARCHIVO_PIZZAS: ${fila.joinToString(";")}")
+                    } else if (producto in productos) {
                         errores.add("Fila ${indice + 1} duplicada en $ARCHIVO_PIZZAS: ${producto.nombre} (ya existe en el catálogo)")
                     } else {
                         productos.add(producto)
@@ -80,14 +78,28 @@ class ProductoRepositoryCsv(
             }
     }
 
+    /**
+     * Crea la pizza según [FilaPizza.tipo], sin distinguir mayúsculas.
+     * Retorna null si el tipo no es [TIPO_CLASICA] ni [TIPO_ESPECIAL].
+     */
+    private fun crearPizza(filaPizza: FilaPizza, receta: Map<String, Int>): Producto? =
+        when (filaPizza.tipo.lowercase()) {
+            TIPO_CLASICA.lowercase() ->
+                PizzaClasica(nombre = filaPizza.nombre, precio = filaPizza.precio, ingredientes = receta)
+            TIPO_ESPECIAL.lowercase() ->
+                PizzaEspecial(nombre = filaPizza.nombre, precio = filaPizza.precio, ingredientes = receta)
+            else -> null
+        }
+
     private fun convertirFilaPizza(fila: List<String>): FilaPizza? {
         if (fila.size != COLUMNAS_PIZZAS) return null
 
         val nombre: String = fila[0]
         val precio: Double? = fila[1].toDoubleOrNull()
+        val tipo: String = fila[2]
 
         return if (nombre.isNotEmpty() && precio != null && precio > 0) {
-            FilaPizza(nombre = nombre, precio = precio)
+            FilaPizza(nombre = nombre, precio = precio, tipo = tipo)
         } else {
             null
         }
@@ -109,7 +121,8 @@ class ProductoRepositoryCsv(
 
     private data class FilaPizza(
         val nombre: String,
-        val precio: Double
+        val precio: Double,
+        val tipo: String
     )
 
     private data class FilaReceta(
@@ -126,7 +139,9 @@ class ProductoRepositoryCsv(
     private companion object {
         const val ARCHIVO_PIZZAS: String = "pizzas.csv"
         const val ARCHIVO_RECETAS: String = "recetas.csv"
-        const val COLUMNAS_PIZZAS: Int = 2
+        const val COLUMNAS_PIZZAS: Int = 3
+        const val TIPO_CLASICA: String = "Clasica"
+        const val TIPO_ESPECIAL: String = "Especial"
         const val COLUMNAS_RECETAS: Int = 3
     }
 }
