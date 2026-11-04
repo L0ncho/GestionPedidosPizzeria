@@ -1,6 +1,7 @@
 package cl.duoc.pmy2201.pizzeria.data
 
 import cl.duoc.pmy2201.pizzeria.model.Repartidor
+import cl.duoc.pmy2201.pizzeria.util.normalizarTelefono
 
 /**
  * Repositorio de repartidores que lee `repartidores.csv` una sola vez y mantiene los datos en memoria.
@@ -37,7 +38,7 @@ class RepartidorRepositoryCsv(
 
         val id: Int? = fila[0].toIntOrNull()
         val nombre: String = fila[1]
-        val telefono: String = fila[2]
+        val telefono: String = normalizarTelefono(fila[2]) ?: fila[2]
         val disponible: Boolean? = fila[3].toBooleanStrictOrNull()
         val distanciaKm: Double? = fila[4].toDoubleOrNull()
 

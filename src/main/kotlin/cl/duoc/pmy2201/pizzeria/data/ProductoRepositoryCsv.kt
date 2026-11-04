@@ -1,5 +1,6 @@
 package cl.duoc.pmy2201.pizzeria.data
 
+import cl.duoc.pmy2201.pizzeria.model.Categoria
 import cl.duoc.pmy2201.pizzeria.model.Producto
 
 /**
@@ -31,8 +32,19 @@ class ProductoRepositoryCsv(
                     errores.add("Fila ${indice + 1} inválida en $ARCHIVO_PIZZAS: ${fila.joinToString(";")}")
                 receta == null ->
                     errores.add("La pizza ${filaPizza.nombre} no tiene receta en $ARCHIVO_RECETAS y se omite.")
-                else ->
-                    productos.add(Producto(nombre = filaPizza.nombre, precio = filaPizza.precio, ingredientes = receta))
+                else -> {
+                    val producto: Producto = Producto(
+                        nombre = filaPizza.nombre,
+                        precio = filaPizza.precio,
+                        ingredientes = receta,
+                        categoria = Categoria.PIZZA
+                    )
+                    if (producto in productos) {
+                        errores.add("Fila ${indice + 1} duplicada en $ARCHIVO_PIZZAS: ${producto.nombre} (ya existe en el catálogo)")
+                    } else {
+                        productos.add(producto)
+                    }
+                }
             }
         }
 

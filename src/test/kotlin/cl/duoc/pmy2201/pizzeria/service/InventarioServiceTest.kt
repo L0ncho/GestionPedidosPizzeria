@@ -1,6 +1,7 @@
 package cl.duoc.pmy2201.pizzeria.service
 
 import cl.duoc.pmy2201.pizzeria.data.InventarioRepository
+import cl.duoc.pmy2201.pizzeria.model.Categoria
 import cl.duoc.pmy2201.pizzeria.model.ItemPedido
 import cl.duoc.pmy2201.pizzeria.model.Producto
 import kotlin.test.Test
@@ -20,7 +21,8 @@ class InventarioServiceTest {
     private val cuatroQuesos: Producto = Producto(
         nombre = "Cuatro Quesos",
         precio = 13990.0,
-        ingredientes = mapOf("Queso mozzarella" to 150, "Queso azul" to 60)
+        ingredientes = mapOf("Queso mozzarella" to 150, "Queso azul" to 60),
+        categoria = Categoria.PIZZA
     )
 
     private fun crearInventario(): MutableMap<String, Int> =

@@ -6,6 +6,8 @@ import cl.duoc.pmy2201.pizzeria.model.Producto
 import cl.duoc.pmy2201.pizzeria.model.UMBRAL_PIZZAS_DESCUENTO
 import cl.duoc.pmy2201.pizzeria.service.InventarioService
 import cl.duoc.pmy2201.pizzeria.service.ResultadoVerificacion
+import cl.duoc.pmy2201.pizzeria.util.RANGO_CANTIDAD_PIZZAS
+import cl.duoc.pmy2201.pizzeria.util.esCantidadValida
 import kotlin.math.roundToInt
 
 /**
@@ -22,7 +24,7 @@ class MenuPizzasConsola(
 
     /**
      * Muestra [productos] como lista numerada y pide productos y cantidades hasta que el usuario termine
-     * o se alcance [MAXIMO_PIZZAS_POR_PEDIDO]. Si un producto se elige más de una vez, suma las cantidades.
+     * o se alcance el límite superior de [RANGO_CANTIDAD_PIZZAS]. Si un producto se elige más de una vez, suma las cantidades.
      * Cada item se agrega solo si el inventario alcanza para el pedido completo; si no, se informa
      * qué falta y se puede elegir otro producto, terminar con los items ya agregados o cancelar.
      * Retorna una lista vacía si el pedido se cancela.
@@ -60,8 +62,8 @@ class MenuPizzasConsola(
             agregarItem(items, producto, cantidad)
 
             val total: Int = totalPizzas(items)
-            if (total >= MAXIMO_PIZZAS_POR_PEDIDO) {
-                println("Se alcanzó el máximo de $MAXIMO_PIZZAS_POR_PEDIDO pizzas por pedido.")
+            if (total >= RANGO_CANTIDAD_PIZZAS.last) {
+                println("Se alcanzó el máximo de ${RANGO_CANTIDAD_PIZZAS.last} pizzas por pedido.")
                 agregarOtro = false
             } else {
                 val respuesta: String = lector.leerTextoObligatorio(
@@ -104,10 +106,10 @@ class MenuPizzasConsola(
 
     private fun pedirCantidad(totalActual: Int): Int {
         while (true) {
-            val cantidad: Int = lector.leerEnteroEnRango("Cantidad: ", 1, MAXIMO_PIZZAS_POR_PEDIDO)
-            if (totalActual + cantidad <= MAXIMO_PIZZAS_POR_PEDIDO) return cantidad
-            val disponibles: Int = MAXIMO_PIZZAS_POR_PEDIDO - totalActual
-            println("El pedido no puede superar $MAXIMO_PIZZAS_POR_PEDIDO pizzas. Puede agregar como máximo $disponibles.")
+            val cantidad: Int = lector.leerEnteroEnRango("Cantidad: ", RANGO_CANTIDAD_PIZZAS.first, RANGO_CANTIDAD_PIZZAS.last)
+            if (esCantidadValida(totalActual + cantidad)) return cantidad
+            val disponibles: Int = RANGO_CANTIDAD_PIZZAS.last - totalActual
+            println("El pedido no puede superar ${RANGO_CANTIDAD_PIZZAS.last} pizzas. Puede agregar como máximo $disponibles.")
         }
     }
 
@@ -123,7 +125,6 @@ class MenuPizzasConsola(
     private fun totalPizzas(items: List<ItemPedido>): Int = items.sumOf { item: ItemPedido -> item.cantidad }
 
     companion object {
-        const val MAXIMO_PIZZAS_POR_PEDIDO: Int = 20
         private const val OPCION_ELEGIR_OTRO: Int = 1
         private const val OPCION_TERMINAR: Int = 2
         private const val OPCION_CANCELAR: Int = 3
