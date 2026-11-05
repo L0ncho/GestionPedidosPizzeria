@@ -160,7 +160,8 @@ class ResumenFuncionalidadesConsola {
     }
 
     /**
-     * Muestra las propiedades y los métodos declarados en [Pedido], [Producto] y [Cliente] usando [AnalizadorClases].
+     * Muestra las propiedades y los métodos de [Pedido], [Producto] y [Cliente] usando [AnalizadorClases].
+     * Las propiedades incluyen las heredadas; los métodos son solo los declarados en cada clase.
      */
     private fun mostrarAnalisisDeClases() {
         println("Análisis de clases (reflection)")
