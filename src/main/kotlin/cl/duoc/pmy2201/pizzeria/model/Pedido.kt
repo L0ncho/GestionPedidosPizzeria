@@ -52,7 +52,8 @@ class Pedido(
 
     /**
      * Combina este pedido con [otro] del mismo cliente usando el operador `+`.
-     * El nuevo pedido usa el [idPedido], el [cliente] y la [fecha] de este pedido y no tiene repartidor.
+     * El nuevo pedido usa el [idPedido], el [cliente] y la [fecha] de este pedido, no tiene repartidor
+     * y parte en estado [EstadoPedido.EN_PREPARACION] (En preparación).
      * Los items se suman; si un producto está en ambos (según `==`), queda una sola línea con la cantidad sumada.
      * Las notas que no son null se unen con " / ". El total se recalcula con [calcularTotal], incluidos los descuentos.
      * No modifica los pedidos originales.

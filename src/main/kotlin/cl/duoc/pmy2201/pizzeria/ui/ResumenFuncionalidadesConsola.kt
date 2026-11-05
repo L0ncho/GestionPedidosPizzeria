@@ -113,7 +113,9 @@ class ResumenFuncionalidadesConsola {
     }
 
     /**
-     * Compara productos con `==` y muestra cuántos pedidos y clientes distintos hay en el día.
+     * Compara productos con `==` y muestra cuántos pedidos y clientes registrados hay en el día.
+     * Agrupa los pedidos por cliente con `groupBy` (que usa `equals` y `hashCode` de [Cliente]) para indicar
+     * si algún cliente tiene más de un pedido.
      * La [PizzaClasica] "pepperoni" (en minúsculas y con otro precio) y el producto con categoría
      * [Categoria.INGREDIENTE] se crean solo para la comparación.
      * `==` usa [Producto.equals] (nombre y categoría), mientras que `===` compara si son el mismo objeto en memoria.
@@ -155,8 +157,16 @@ class ResumenFuncionalidadesConsola {
                     if (otraCategoria) "" else ", otra categoría"
             )
         }
-        println("  Pedidos registrados: ${pedidos.size} | Clientes distintos: ${clientes.size}")
-        println("  Los clientes repetidos (mismo nombre y correo, según ==) no se duplicaron.")
+        println("  Pedidos registrados: ${pedidos.size} | Clientes registrados: ${clientes.size}")
+        val pedidosPorCliente: Map<Cliente, List<Pedido>> = pedidos.groupBy { pedido: Pedido -> pedido.cliente }
+        val hayClientesConVariosPedidos: Boolean =
+            pedidosPorCliente.values.any { pedidosCliente: List<Pedido> -> pedidosCliente.size > 1 }
+        val mensajeClientes: String = if (hayClientesConVariosPedidos) {
+            "Hay clientes con más de un pedido: se reutilizaron sin duplicarse (comparados con ==)."
+        } else {
+            "Aún no hay clientes con más de un pedido."
+        }
+        println("  $mensajeClientes")
     }
 
     /**

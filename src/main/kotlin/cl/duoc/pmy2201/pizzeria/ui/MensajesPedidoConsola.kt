@@ -101,7 +101,7 @@ class MensajesPedidoConsola {
     }
 
     fun mostrarPedidoNoEncontrado() {
-        println("Pedido no encontrado")
+        println("Pedido no encontrado.")
     }
 
     fun mostrarNoSePuedeDespachar() {

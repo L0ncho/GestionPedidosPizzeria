@@ -4,7 +4,8 @@ package cl.duoc.pmy2201.pizzeria.model
  * Cliente que realiza el pedido.
  *
  * @param nombre Nombre del cliente.
- * @param telefono Teléfono de contacto, o "No informado" si no se entregó uno válido.
+ * @param telefono Teléfono de contacto; si no se entrega uno válido tras los intentos, se usa
+ * [cl.duoc.pmy2201.pizzeria.util.TELEFONO_POR_DEFECTO] (+56900000000).
  * @property correo Correo electrónico, o `null` si no se informó.
  * @property direccion Dirección de entrega.
  */
