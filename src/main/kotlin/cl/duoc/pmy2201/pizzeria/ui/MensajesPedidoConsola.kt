@@ -40,7 +40,8 @@ class MensajesPedidoConsola {
         println("2. Reporte del día")
         println("3. Cambiar estado de un pedido")
         println("4. Inventario")
-        println("5. Salir")
+        println("5. Resumen de funcionalidades")
+        println("6. Salir")
     }
 
     /**

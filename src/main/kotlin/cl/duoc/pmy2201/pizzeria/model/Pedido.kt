@@ -39,6 +39,50 @@ class Pedido(
     }
 
     /**
+     * Funciones de desestructuración: permiten escribir `val (cliente, productos, total) = pedido`.
+     * [component1] retorna el cliente, [component2] los items y [component3] el total final de [calcularTotal].
+     */
+    operator fun component1(): Cliente = cliente
+
+    /** Retorna los [items] del pedido (ver [component1]). */
+    operator fun component2(): List<ItemPedido> = items
+
+    /** Retorna el total final del pedido, con descuentos, según [calcularTotal] (ver [component1]). */
+    operator fun component3(): Double = calcularTotal().total
+
+    /**
+     * Combina este pedido con [otro] del mismo cliente usando el operador `+`.
+     * El nuevo pedido usa el [idPedido], el [cliente] y la [fecha] de este pedido y no tiene repartidor.
+     * Los items se suman; si un producto está en ambos (según `==`), queda una sola línea con la cantidad sumada.
+     * Las notas que no son null se unen con " / ". El total se recalcula con [calcularTotal], incluidos los descuentos.
+     * No modifica los pedidos originales.
+     *
+     * @throws IllegalArgumentException si los clientes de ambos pedidos no son iguales (`==`).
+     */
+    operator fun plus(otro: Pedido): Pedido {
+        require(cliente == otro.cliente) {
+            "No se pueden combinar los pedidos $idPedido y ${otro.idPedido}: pertenecen a clientes distintos."
+        }
+        val cantidadesPorProducto: Map<Producto, Int> = (items + otro.items)
+            .groupingBy { item: ItemPedido -> item.producto }
+            .fold(0) { acumulado: Int, item: ItemPedido -> acumulado + item.cantidad }
+        val itemsCombinados: List<ItemPedido> = cantidadesPorProducto.map { entrada: Map.Entry<Producto, Int> ->
+            ItemPedido(producto = entrada.key, cantidad = entrada.value)
+        }
+        val notasCombinadas: String? = listOfNotNull(notas, otro.notas)
+            .joinToString(" / ")
+            .takeIf { texto: String -> texto.isNotEmpty() }
+        return Pedido(
+            idPedido = idPedido,
+            cliente = cliente,
+            items = itemsCombinados,
+            notas = notasCombinadas,
+            repartidor = null,
+            fecha = fecha
+        )
+    }
+
+    /**
      * Retorna el estado que sigue al actual, o null si el pedido ya fue entregado.
      */
     fun siguienteEstado(): EstadoPedido? = when (estado) {

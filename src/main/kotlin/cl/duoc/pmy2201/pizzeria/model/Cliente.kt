@@ -42,6 +42,18 @@ class Cliente(
         return 31 * hashNombre + (correoNormalizado()?.hashCode() ?: 0)
     }
 
+    /**
+     * Funciones de desestructuración: permiten escribir `val (nombre, correo, telefono) = cliente`.
+     * [component1] retorna el nombre, [component2] el correo y [component3] el teléfono.
+     */
+    operator fun component1(): String = nombre
+
+    /** Retorna el [correo] del cliente (ver [component1]). */
+    operator fun component2(): String? = correo
+
+    /** Retorna el teléfono del cliente (ver [component1]). */
+    operator fun component3(): String = telefono
+
     private fun nombreNormalizado(): String = nombre.trim().lowercase()
 
     private fun correoNormalizado(): String? = correo?.lowercase()

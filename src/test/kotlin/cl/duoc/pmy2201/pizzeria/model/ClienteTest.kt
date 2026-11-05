@@ -47,4 +47,15 @@ class ClienteTest {
 
         assertEquals(1, clientes.size)
     }
+
+    @Test
+    fun desestructuracionEntregaNombreCorreoYTelefono() {
+        val cliente: Cliente = crearCliente(nombre = "Ana Pérez", correo = "ana@example.com", telefono = "+56931717552")
+
+        val (nombre: String, correo: String?, telefono: String) = cliente
+
+        assertEquals("Ana Pérez", nombre)
+        assertEquals("ana@example.com", correo)
+        assertEquals("+56931717552", telefono)
+    }
 }

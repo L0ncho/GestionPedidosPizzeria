@@ -23,13 +23,15 @@ import cl.duoc.pmy2201.pizzeria.ui.MensajesPedidoConsola
 import cl.duoc.pmy2201.pizzeria.ui.MenuPizzasConsola
 import cl.duoc.pmy2201.pizzeria.ui.RegistroClienteConsola
 import cl.duoc.pmy2201.pizzeria.ui.ReporteDiaConsola
+import cl.duoc.pmy2201.pizzeria.ui.ResumenFuncionalidadesConsola
 import cl.duoc.pmy2201.pizzeria.ui.ResumenPedidoConsola
 
 private const val OPCION_REGISTRAR_PEDIDO: Int = 1
 private const val OPCION_REPORTE_DIA: Int = 2
 private const val OPCION_CAMBIAR_ESTADO: Int = 3
 private const val OPCION_INVENTARIO: Int = 4
-private const val OPCION_SALIR: Int = 5
+private const val OPCION_RESUMEN_FUNCIONALIDADES: Int = 5
+private const val OPCION_SALIR: Int = 6
 
 fun main() {
     val productoRepository: ProductoRepository = ProductoRepositoryCsv()
@@ -53,6 +55,7 @@ fun main() {
     val resumenPedidoConsola: ResumenPedidoConsola = ResumenPedidoConsola()
     val reporteDiaConsola: ReporteDiaConsola = ReporteDiaConsola()
     val inventarioConsola: InventarioConsola = InventarioConsola(lector, inventarioService, inventarioRepository)
+    val resumenFuncionalidadesConsola: ResumenFuncionalidadesConsola = ResumenFuncionalidadesConsola()
 
     mensajes.mostrarBienvenida()
     mensajes.mostrarErroresDeCarga(
@@ -84,6 +87,11 @@ fun main() {
             OPCION_REPORTE_DIA -> reporteDiaConsola.mostrar(pedidoService.pedidosDelDia())
             OPCION_CAMBIAR_ESTADO -> cambiarEstadoPedido(pedidoService, asignacionRepartidorService, lector, mensajes)
             OPCION_INVENTARIO -> inventarioConsola.gestionar()
+            OPCION_RESUMEN_FUNCIONALIDADES -> resumenFuncionalidadesConsola.mostrar(
+                pedidos = pedidoService.pedidosDelDia(),
+                clientes = clienteService.clientesDelDia(),
+                productos = productos
+            )
             OPCION_SALIR -> mensajes.mostrarDespedida()
         }
     } while (opcion != OPCION_SALIR)
