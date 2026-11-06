@@ -20,8 +20,8 @@ class PedidoService(
      * Registra un pedido con los [items] del [cliente]:
      * - [ResultadoRegistro.SinCapacidad] si ya se alcanzó [CAPACIDAD_PEDIDOS_DIA]; no se modifica nada.
      * - [ResultadoRegistro.Rechazado] si faltan ingredientes; no se modifica el inventario.
-     * - [ResultadoRegistro.Registrado] si hay ingredientes: los descuenta, crea el pedido,
-     *   le asigna el repartidor disponible más cercano y lo guarda.
+     * - [ResultadoRegistro.Registrado] si hay ingredientes: descuenta las cantidades acumuladas de todos
+     *   los items en una sola operación, crea el pedido, le asigna el repartidor disponible más cercano y lo guarda.
      */
     fun registrarPedido(cliente: Cliente, items: List<ItemPedido>, notas: String?): ResultadoRegistro {
         if (cantidadPedidos >= CAPACIDAD_PEDIDOS_DIA) return ResultadoRegistro.SinCapacidad
@@ -29,9 +29,7 @@ class PedidoService(
         return when (val verificacion: ResultadoVerificacion = inventarioService.verificar(items)) {
             is ResultadoVerificacion.Insuficiente -> ResultadoRegistro.Rechazado(resultado = verificacion)
             ResultadoVerificacion.Disponible -> {
-                items.forEach { item: ItemPedido ->
-                    inventarioService.prepararLote(item.producto.ingredientes, item.cantidad)
-                }
+                inventarioService.prepararLote(items)
                 val pedido: Pedido = Pedido(
                     idPedido = cantidadPedidos + 1,
                     cliente = cliente,

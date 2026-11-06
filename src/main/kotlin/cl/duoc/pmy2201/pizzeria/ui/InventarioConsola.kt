@@ -14,7 +14,8 @@ class InventarioConsola(
 
     /**
      * Muestra el inventario numerado, pide un ingrediente y la cantidad recibida (repitiendo hasta que sea válida)
-     * y lo reabastece. Con 0 vuelve al menú sin cambios.
+     * y lo reabastece. Con 0 vuelve al menú sin cambios. Si la cantidad haría superar el máximo de Int,
+     * informa el error, no modifica el stock y vuelve a pedir la cantidad.
      */
     fun gestionar() {
         val ingredientes: List<String> = inventarioRepository.obtenerInventario().keys.toList()
@@ -39,6 +40,8 @@ class InventarioConsola(
                 println("Debe ingresar un número entero.")
             } catch (excepcion: IllegalArgumentException) {
                 println(excepcion.message)
+            } catch (excepcion: ArithmeticException) {
+                println("La cantidad supera el máximo permitido para el inventario.")
             }
         }
 

@@ -11,20 +11,24 @@ class InventarioService(
 ) {
 
     /**
-     * Multiplica cada cantidad de la receta [ingredientes] por [cantidadPizzas].
+     * Multiplica cada cantidad de la receta [ingredientes] por [cantidadPizzas] usando [Math.multiplyExact].
+     *
+     * @throws ArithmeticException si algún producto supera el máximo de Int.
      */
     fun calcularIngredientesLote(ingredientes: Map<String, Int>, cantidadPizzas: Int): Map<String, Int> =
-        ingredientes.mapValues { entrada: Map.Entry<String, Int> -> entrada.value * cantidadPizzas }
+        ingredientes.mapValues { entrada: Map.Entry<String, Int> -> Math.multiplyExact(entrada.value, cantidadPizzas) }
 
     /**
-     * Suma los ingredientes necesarios para todos los [items] del pedido.
+     * Suma los ingredientes necesarios para todos los [items] del pedido usando [Math.addExact].
+     *
+     * @throws ArithmeticException si alguna cantidad calculada o acumulada supera el máximo de Int.
      */
     fun calcularNecesarios(items: List<ItemPedido>): Map<String, Int> {
         val necesarios: MutableMap<String, Int> = mutableMapOf()
 
         items.forEach { item: ItemPedido ->
             calcularIngredientesLote(item.producto.ingredientes, item.cantidad).forEach { (ingrediente: String, cantidad: Int) ->
-                necesarios[ingrediente] = (necesarios[ingrediente] ?: 0) + cantidad
+                necesarios[ingrediente] = Math.addExact(necesarios[ingrediente] ?: 0, cantidad)
             }
         }
 
@@ -33,6 +37,8 @@ class InventarioService(
 
     /**
      * Verifica si el inventario alcanza para los [items]; no modifica el inventario.
+     *
+     * @throws ArithmeticException si las cantidades necesarias superan el máximo de Int (ver [calcularNecesarios]).
      */
     fun verificar(items: List<ItemPedido>): ResultadoVerificacion {
         val inventario: Map<String, Int> = inventarioRepository.obtenerInventario()
@@ -54,34 +60,50 @@ class InventarioService(
     }
 
     /**
-     * Descuenta del inventario las cantidades [necesarios]. Se espera que antes se haya llamado a [verificar];
-     * los ingredientes que no existen en el inventario se ignoran.
+     * Descuenta del inventario las cantidades [necesarios] en una sola operación de todo o nada:
+     * primero valida todos los ingredientes y solo si todos son válidos los descuenta.
+     * Si alguna validación falla, no se modifica ningún ingrediente.
+     *
+     * @throws IllegalArgumentException si alguna cantidad es menor o igual a 0, si un ingrediente
+     * no existe en el inventario o si su stock disponible es menor que la cantidad a descontar.
      */
     fun descontar(necesarios: Map<String, Int>) {
         val inventario: MutableMap<String, Int> = inventarioRepository.obtenerInventario()
 
         necesarios.forEach { (ingrediente: String, cantidad: Int) ->
-            val disponible: Int? = inventario[ingrediente]
-            if (disponible != null) {
-                inventario[ingrediente] = disponible - cantidad
+            require(cantidad > 0) {
+                "La cantidad a descontar de '$ingrediente' debe ser mayor que 0 (se recibió $cantidad)."
             }
+            val disponible: Int? = inventario[ingrediente]
+            require(disponible != null) { "El ingrediente '$ingrediente' no existe en el inventario." }
+            require(disponible >= cantidad) {
+                "Stock insuficiente de '$ingrediente': disponible $disponible, se necesitan $cantidad."
+            }
+        }
+
+        necesarios.forEach { (ingrediente: String, cantidad: Int) ->
+            inventario[ingrediente] = inventario.getValue(ingrediente) - cantidad
         }
     }
 
     /**
-     * Calcula los ingredientes para [cantidadPizzas] según la receta [ingredientes], los descuenta
-     * del inventario y retorna lo usado. Se espera que antes se haya llamado a [verificar].
+     * Calcula con [calcularNecesarios] las cantidades acumuladas de todos los [items] del pedido,
+     * las descuenta del inventario con una sola llamada a [descontar] y retorna lo descontado.
+     *
+     * @throws IllegalArgumentException si el inventario no alcanza; en ese caso no se modifica ningún ingrediente.
+     * @throws ArithmeticException si las cantidades acumuladas superan el máximo de Int; no se modifica ningún ingrediente.
      */
-    fun prepararLote(ingredientes: Map<String, Int>, cantidadPizzas: Int): Map<String, Int> {
-        val usados: Map<String, Int> = calcularIngredientesLote(ingredientes, cantidadPizzas)
-        descontar(usados)
-        return usados
+    fun prepararLote(items: List<ItemPedido>): Map<String, Int> {
+        val necesarios: Map<String, Int> = calcularNecesarios(items)
+        descontar(necesarios)
+        return necesarios
     }
 
     /**
-     * Suma [cantidad] al stock de [ingrediente].
+     * Suma [cantidad] al stock de [ingrediente] usando [Math.addExact].
      *
      * @throws IllegalArgumentException si [cantidad] es menor o igual a 0 o si [ingrediente] no existe en el inventario.
+     * @throws ArithmeticException si el nuevo stock supera el máximo de Int; en ese caso el stock no cambia.
      */
     fun reabastecer(ingrediente: String, cantidad: Int) {
         val inventario: MutableMap<String, Int> = inventarioRepository.obtenerInventario()
@@ -93,7 +115,7 @@ class InventarioService(
             disponible == null ->
                 throw IllegalArgumentException("El ingrediente '$ingrediente' no existe en el inventario.")
             else ->
-                inventario[ingrediente] = disponible + cantidad
+                inventario[ingrediente] = Math.addExact(disponible, cantidad)
         }
     }
 }

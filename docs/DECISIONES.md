@@ -85,6 +85,12 @@ Aplicación de consola de uso interno para el personal de una pizzería. Permite
 | 5 | `equals` y `hashCode` de `Producto` para no duplicar productos | `data/ProductoRepositoryCsv.kt`, `ui/MenuPizzasConsola.kt` | `cargar`, `agregarItem` |
 | 6 | Resumen en consola desde `Main.kt` | `Main.kt`, `ui/ResumenFuncionalidadesConsola.kt` | `main` (opción 5), `mostrar` |
 
+### Ajustes por retroalimentación de la semana 2
+
+- **Descuento de todo o nada:** `descontar` valida primero cada ingrediente con `require` (cantidad mayor que 0, el ingrediente existe en el inventario y el stock alcanza) y solo después modifica el inventario. Si alguna validación falla, no se modifica ningún ingrediente.
+- **Una sola actualización por pedido:** `prepararLote` recibe los items del pedido, calcula las cantidades acumuladas con `calcularNecesarios` y las descuenta en una sola actualización. `PedidoService` la llama una vez por pedido, en vez de ítem por ítem.
+- **Sin desbordamientos:** `calcularIngredientesLote` usa `Math.multiplyExact`, y `calcularNecesarios` y `reabastecer` usan `Math.addExact`. Si un resultado supera el máximo de Int se lanza `ArithmeticException` en vez de quedar un número negativo. Al reabastecer, la consola informa "La cantidad supera el máximo permitido para el inventario.", no modifica el stock y vuelve a pedir la cantidad.
+
 ## 3. Errores encontrados en pruebas y su resolución
 
 - **Revisión tardía de ingredientes:** la falta se detectaba al final del pedido; ahora se verifica al agregar cada pizza.
@@ -100,7 +106,7 @@ Aplicación de consola de uso interno para el personal de una pizzería. Permite
 - **Clientes sin correo:** dos clientes con el mismo nombre y sin correo se consideran el mismo cliente.
 - **Fecha de la promoción:** la promoción depende de la fecha del sistema.
 - **Cierre forzado de la entrada:** si la entrada de la consola se cierra (por ejemplo, al detener la ejecución con la entrada abierta), algunos menús quedan en un ciclo infinito porque la lectura devuelve el valor por defecto en cada vuelta. En uso normal no ocurre.
-- **Cantidades muy grandes al reabastecer:** una cantidad que, sumada al stock actual, supere el máximo de Int puede desbordar el valor del inventario.
+- **Recetas con cantidades excesivas:** si `recetas.csv` tuviera cantidades absurdamente grandes, la verificación de ingredientes lanza `ArithmeticException` y el programa se detiene, en vez de continuar con valores incorrectos.
 
 ## 5. Mejoras futuras
 
